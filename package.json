@@ -12,7 +12,7 @@
     "predeploy": "react-scripts build",
     "deploy": "gh-pages -d build"
   },
-  "homepage": "https://phucla-agilityio.github.io/time-tracking",
+  "homepage": "https://phucla.github.io/app",
   "eslintConfig": {
     "extends": "react-app"
   },
