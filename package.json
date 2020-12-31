@@ -12,7 +12,7 @@
     "predeploy": "react-scripts build",
     "deploy": "gh-pages -d build"
   },
-  "homepage": "https://phucla.github.io/app",
+  "homepage": "https://phucla.github.io",
   "eslintConfig": {
     "extends": "react-app"
   },
