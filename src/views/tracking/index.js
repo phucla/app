@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Container,
   Grid,
@@ -6,6 +6,7 @@ import {
 } from '@material-ui/core';
 import Page from 'src/components/Page';
 import ProfileDetails from './ProfileDetails';
+import { db } from '../../api/config';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -18,7 +19,18 @@ const useStyles = makeStyles((theme) => ({
 
 const Account = () => {
   const classes = useStyles();
-
+  const [users, setUsers] = useState([]);
+  useEffect(() => {
+    db.collection('users').get().then((querySnapshot) => {
+      const data = [];
+      querySnapshot.forEach((doc) => {
+        data.push({ id: doc.id, ...doc.data() });
+        // console.log(`${doc.id} => ${doc.data()}`);
+      });
+      setUsers(data);
+    });
+  }, []);
+  console.log(users);
   return (
     <Page
       className={classes.root}
@@ -35,7 +47,7 @@ const Account = () => {
             md={6}
             xs={12}
           >
-            <ProfileDetails />
+            <ProfileDetails users={users} />
           </Grid>
         </Grid>
       </Container>

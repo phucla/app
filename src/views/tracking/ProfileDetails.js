@@ -1,5 +1,5 @@
 import 'date-fns';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import {
@@ -19,27 +19,14 @@ import {
 } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import moment from 'moment';
-
-const states = [
-  {
-    value: 'alabama',
-    label: 'Ca 1'
-  },
-  {
-    value: 'new-york',
-    label: 'Ca 2'
-  },
-  {
-    value: 'san-francisco',
-    label: 'Ca 3'
-  }
-];
+import { db } from 'src/services';
+import history from 'src/utils/history';
 
 const useStyles = makeStyles(() => ({
   root: {}
 }));
 
-const ProfileDetails = ({ className, ...rest }) => {
+const ProfileDetails = ({ users, className, ...rest }) => {
   const classes = useStyles();
   const [values, setValues] = useState({
     firstName: 'Katarina',
@@ -49,11 +36,18 @@ const ProfileDetails = ({ className, ...rest }) => {
     state: 'Alabama',
     country: 'USA'
   });
+  useEffect(() => {
+    setValues({
+      ...users[0]
+    });
+  }, [users]);
 
   const handleChange = (event) => {
+    const user = users.find((item) => item.id === event.target.value);
+
     setValues({
       ...values,
-      [event.target.name]: event.target.value
+      ...user
     });
   };
 
@@ -61,17 +55,30 @@ const ProfileDetails = ({ className, ...rest }) => {
   const [selectedDate1, setSelectedDate1] = React.useState(new Date());
 
   const handleDateChange = (date) => {
-    console.log('Now 1:', moment(date).fromNow());
     setSelectedDate(date);
   };
 
   const handleDateChange1 = (date) => {
-    console.log('date: ', date, selectedDate);
-    const time = moment(date).unix() - moment(selectedDate).unix();
-    console.log('date: ', time);
-    console.log('Now:', moment(time).get('hour'));
     setSelectedDate1(date);
   };
+
+  const handleSave = () => {
+    const time = moment(selectedDate1);
+    const duration = moment.duration(time.diff(selectedDate));
+    const hours = duration.asHours();
+
+    db.collection('trackings').add({
+      user: values.id,
+      name: values.name,
+      start: moment(selectedDate).format(),
+      end: moment(selectedDate1).format(),
+      date: moment().format('DD-MM-YYYY'),
+      hours
+    }).then(() => {
+      history.push('/app/dashboard');
+    });
+  };
+
   return (
     <form
       autoComplete="off"
@@ -98,21 +105,20 @@ const ProfileDetails = ({ className, ...rest }) => {
               >
                 <TextField
                   fullWidth
-                  label="Select State"
-                  name="state"
+                  name="user"
                   onChange={handleChange}
                   required
                   select
                   SelectProps={{ native: true }}
-                  value={values.state}
+                  value={values.id}
                   variant="outlined"
                 >
-                  {states.map((option) => (
+                  {users.map((option) => (
                     <option
-                      key={option.value}
-                      value={option.value}
+                      key={option.id}
+                      value={option.id}
                     >
-                      {option.label}
+                      {option.name}
                     </option>
                   ))}
                 </TextField>
@@ -124,7 +130,7 @@ const ProfileDetails = ({ className, ...rest }) => {
               >
                 <KeyboardTimePicker
                   margin="normal"
-                  // ampm={false}
+                  ampm={false}
                   id="time-picker"
                   label="Start"
                   value={selectedDate}
@@ -143,26 +149,12 @@ const ProfileDetails = ({ className, ...rest }) => {
                   margin="normal"
                   id="time-picker"
                   label="End"
+                  ampm={false}
                   value={selectedDate1}
                   onChange={handleDateChange1}
                   KeyboardButtonProps={{
                     'aria-label': 'change time',
                   }}
-                />
-              </Grid>
-              <Grid
-                item
-                md={12}
-                xs={12}
-              >
-                <TextField
-                  fullWidth
-                  label="Note"
-                  name="country"
-                  onChange={handleChange}
-                  required
-                  value={values.country}
-                  variant="outlined"
                 />
               </Grid>
             </Grid>
@@ -176,6 +168,7 @@ const ProfileDetails = ({ className, ...rest }) => {
             <Button
               color="primary"
               variant="contained"
+              onClick={handleSave}
             >
               Save details
             </Button>
@@ -187,7 +180,8 @@ const ProfileDetails = ({ className, ...rest }) => {
 };
 
 ProfileDetails.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
+  users: PropTypes.array
 };
 
 export default ProfileDetails;

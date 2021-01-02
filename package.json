@@ -38,6 +38,7 @@
     "chart.js": "^2.9.3",
     "clsx": "^1.1.1",
     "date-fns": "^2.16.1",
+    "firebase": "^8.2.1",
     "formik": "^2.1.5",
     "gh-pages": "^3.1.0",
     "history": "^5.0.0",
@@ -54,6 +55,8 @@
     "react-router": "^6.0.0-beta.0",
     "react-router-dom": "^6.0.0-beta.0",
     "react-scripts": "^3.4.1",
+    "rxfire": "^4.0.0",
+    "rxjs": "^6.6.3",
     "uuid": "^8.3.0",
     "yup": "^0.29.3"
   },
