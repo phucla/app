@@ -5,8 +5,8 @@ import {
   makeStyles
 } from '@material-ui/core';
 import Page from 'src/components/Page';
+import { db } from 'src/services';
 import ProfileDetails from './ProfileDetails';
-import { db } from '../../api/config';
 
 const useStyles = makeStyles((theme) => ({
   root: {
