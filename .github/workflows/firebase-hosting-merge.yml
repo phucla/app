@@ -12,4 +12,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: yarn
+      - run: git config --global user.email "laducphuc@gmail.com"
+      - run: git config --global user.name "PhucLa"
       - run: yarn deploy
