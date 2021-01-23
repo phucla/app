@@ -27,15 +27,16 @@ const useStyles = makeStyles(() => ({
 }));
 
 const LatestOrders = ({
-  users = [], trackings = {}, className, isLoading, ...rest
+  users = [],
+  trackings = {},
+  className,
+  isLoading,
+  ...rest
 }) => {
   const classes = useStyles();
 
   return (
-    <Card
-      className={clsx(classes.root, className)}
-      {...rest}
-    >
+    <Card className={clsx(classes.root, className)} {...rest}>
       {isLoading && <Indicator />}
       <CardHeader title="Latest Orders" />
       <Divider />
@@ -44,34 +45,23 @@ const LatestOrders = ({
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>
-                  Date
-                </TableCell>
-                {
-                  users.map((item) => (
-                    <TableCell key={item.id}>
-                      {item.name}
-                    </TableCell>
-                  ))
-                }
+                <TableCell>Date</TableCell>
+                {users.map(item => (
+                  <TableCell key={item.id}>{item.name}</TableCell>
+                ))}
               </TableRow>
             </TableHead>
             <TableBody>
-              {Object.keys(trackings).map((key) => (
-                <TableRow
-                  hover
-                  key={key}
-                >
-                  <TableCell>
-                    {key}
-                  </TableCell>
-                  {
-                    users.map((item) => (
-                      <TableCell key={item.id}>
-                        {trackings[key][item.id]}
-                      </TableCell>
-                    ))
-                    }
+              {Object.keys(trackings).map(key => (
+                <TableRow hover key={key}>
+                  <TableCell>{key}</TableCell>
+                  {users.map(item => (
+                    <TableCell key={item.id}>
+                      {trackings[key][item.id]?.map(cell => (
+                        <p key={cell}>{cell}</p>
+                      ))}
+                    </TableCell>
+                  ))}
                 </TableRow>
               ))}
             </TableBody>
@@ -89,12 +79,16 @@ LatestOrders.propTypes = {
   isLoading: PropTypes.bool
 };
 
-export default withObservableStream(combineLatest([usersStore$, trackings$]).pipe(
-  map(([orders, tracking]) => ({
-    users: orders.users,
-    isLoading: tracking.isLoading,
-    trackings: tracking.trackings
-  }))
-), {}, {
-  users: [],
-})(LatestOrders);
+export default withObservableStream(
+  combineLatest([usersStore$, trackings$]).pipe(
+    map(([orders, tracking]) => ({
+      users: orders.users,
+      isLoading: tracking.isLoading,
+      trackings: tracking.trackings
+    }))
+  ),
+  {},
+  {
+    users: []
+  }
+)(LatestOrders);

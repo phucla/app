@@ -5,19 +5,23 @@ export const formatTime = (data = []) => {
   let note = '';
   let date;
   for (let i = 0; i < data.length; i++) {
-    note = `${moment(data[i].start).format('hh:mm')} => ${moment(data[i].end).format('hh:mm')}`;
+    note = `${moment(data[i].start).format('HH:mm')} => ${moment(
+      data[i].end
+    ).format('HH:mm')}`;
     date = data[i].date;
     if (result[date]) {
-      result[date][data[i].user] = note;
+      const notes = result[date][data[i].user] || [];
+      result[date][data[i].user] = [...notes, note];
     } else {
       result = {
         ...result,
         [date]: {
-          [data[i].user]: note
+          [data[i].user]: [note]
         }
       };
     }
   }
 
+  console.log(result);
   return result;
 };

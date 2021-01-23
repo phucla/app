@@ -2,6 +2,7 @@ import 'date-fns';
 import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -16,34 +17,31 @@ import {
 import {
   MuiPickersUtilsProvider,
   KeyboardTimePicker,
+  KeyboardDatePicker
 } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import moment from 'moment';
 import { db } from 'src/services';
-import history from 'src/utils/history';
 
 const useStyles = makeStyles(() => ({
   root: {}
 }));
 
 const ProfileDetails = ({ users, className, ...rest }) => {
+  const navigate = useNavigate();
   const classes = useStyles();
   const [values, setValues] = useState({
-    firstName: 'Katarina',
-    lastName: 'Smith',
-    email: 'demo@devias.io',
-    phone: '',
-    state: 'Alabama',
-    country: 'USA'
+    date: moment().format('DD-MM-YYYY')
   });
   useEffect(() => {
     setValues({
+      ...values,
       ...users[0]
     });
   }, [users]);
 
-  const handleChange = (event) => {
-    const user = users.find((item) => item.id === event.target.value);
+  const handleChange = event => {
+    const user = users.find(item => item.id === event.target.value);
 
     setValues({
       ...values,
@@ -54,11 +52,18 @@ const ProfileDetails = ({ users, className, ...rest }) => {
   const [selectedDate, setSelectedDate] = React.useState(new Date());
   const [selectedDate1, setSelectedDate1] = React.useState(new Date());
 
-  const handleDateChange = (date) => {
+  const handleDateChange = date => {
+    setValues({
+      ...values,
+      date: moment(date).format('DD-MM-YYYY')
+    });
+  };
+
+  const handleDateTimeStart = date => {
     setSelectedDate(date);
   };
 
-  const handleDateChange1 = (date) => {
+  const handleDateChange1 = date => {
     setSelectedDate1(date);
   };
 
@@ -66,17 +71,20 @@ const ProfileDetails = ({ users, className, ...rest }) => {
     const time = moment(selectedDate1);
     const duration = moment.duration(time.diff(selectedDate));
     const hours = duration.asHours();
-
-    db.collection('trackings').add({
+    const data = {
       user: values.id,
       name: values.name,
       start: moment(selectedDate).format(),
       end: moment(selectedDate1).format(),
-      date: moment().format('DD-MM-YYYY'),
+      date: values.date,
       hours
-    }).then(() => {
-      history.push('/app/dashboard');
-    });
+    };
+    console.log(data, values);
+    db.collection('trackings')
+      .add(data)
+      .then(() => {
+        navigate('/app/dashboard', { replace: true });
+      });
   };
 
   return (
@@ -94,15 +102,8 @@ const ProfileDetails = ({ users, className, ...rest }) => {
           />
           <Divider />
           <CardContent>
-            <Grid
-              container
-              spacing={3}
-            >
-              <Grid
-                item
-                md={12}
-                xs={12}
-              >
+            <Grid container spacing={3}>
+              <Grid item md={12} xs={12}>
                 <TextField
                   fullWidth
                   name="user"
@@ -113,38 +114,44 @@ const ProfileDetails = ({ users, className, ...rest }) => {
                   value={values.id}
                   variant="outlined"
                 >
-                  {users.map((option) => (
-                    <option
-                      key={option.id}
-                      value={option.id}
-                    >
+                  {users.map(option => (
+                    <option key={option.id} value={option.id}>
                       {option.name}
                     </option>
                   ))}
                 </TextField>
               </Grid>
-              <Grid
-                item
-                md={6}
-                xs={12}
-              >
+              <Grid item md={12} xs={12}>
+                <KeyboardDatePicker
+                  maxDate={new Date()}
+                  autoOk
+                  disableToolbar
+                  variant="inline"
+                  format="MM/dd/yyyy"
+                  margin="normal"
+                  id="date-picker-inline"
+                  label="Date picker inline"
+                  value={selectedDate}
+                  onChange={handleDateChange}
+                  KeyboardButtonProps={{
+                    'aria-label': 'change date'
+                  }}
+                />
+              </Grid>
+              <Grid item md={6} xs={12}>
                 <KeyboardTimePicker
                   margin="normal"
                   ampm={false}
                   id="time-picker"
                   label="Start"
                   value={selectedDate}
-                  onChange={handleDateChange}
+                  onChange={handleDateTimeStart}
                   KeyboardButtonProps={{
-                    'aria-label': 'change time',
+                    'aria-label': 'change time'
                   }}
                 />
               </Grid>
-              <Grid
-                item
-                md={6}
-                xs={12}
-              >
+              <Grid item md={6} xs={12}>
                 <KeyboardTimePicker
                   margin="normal"
                   id="time-picker"
@@ -153,23 +160,15 @@ const ProfileDetails = ({ users, className, ...rest }) => {
                   value={selectedDate1}
                   onChange={handleDateChange1}
                   KeyboardButtonProps={{
-                    'aria-label': 'change time',
+                    'aria-label': 'change time'
                   }}
                 />
               </Grid>
             </Grid>
           </CardContent>
           <Divider />
-          <Box
-            display="flex"
-            justifyContent="flex-end"
-            p={2}
-          >
-            <Button
-              color="primary"
-              variant="contained"
-              onClick={handleSave}
-            >
+          <Box display="flex" justifyContent="flex-end" p={2}>
+            <Button color="primary" variant="contained" onClick={handleSave}>
               Save details
             </Button>
           </Box>
